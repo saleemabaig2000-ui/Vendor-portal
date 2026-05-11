@@ -184,21 +184,20 @@
         summary.appendChild(row);
       });
 
-      fetch('https://default76ce8b888d444d7c92123238ef2975.4d.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/685b74af06ad49a9ad54cc46b553f35d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=IfySuLYJVSAI85Oe5DeCA3Wj6izvTv3Xf34wbYzOHSw', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ vendor: vendorName, updates: updates })
-})
-.then(res => {
-  if (!res.ok) throw new Error('Failed');
-  document.getElementById('main-form').style.display = 'none';
-  document.getElementById('success-screen').style.display = 'block';
-})
-.catch(() => {
-  btn.disabled = false;
-  btn.textContent = 'Submit Updates';
-  alert('Submission failed. Please try again or contact the procurement team.');
-});
+      fetch('https://default76ce8b888d444d7c92123238ef2975.4d.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/3b4bf02343ce4294a5deaf6607737234/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pbMJDCZTaJhmfjx2gyqBlhDMeCHUzuxJpq78uv6rHKM', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vendor: vendorName, updates: updates })
+      })
+      .then(() => {
+        document.getElementById('main-form').style.display = 'none';
+        document.getElementById('success-screen').style.display = 'block';
+      })
+      .catch(() => {
+        btn.disabled = false;
+        btn.textContent = 'Submit Updates';
+        alert('Submission failed. Please try again or contact the procurement team.');
+      });
     };
   }
 </script>
