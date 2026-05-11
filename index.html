@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Date Update Portal</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #F7F5F0; margin: 0; padding: 20px; color: #1a1a1a; }
+  .container { max-width: 950px; margin: 0 auto; background: #ffffff; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; }
+  .header { background: #003366; color: #ffffff; padding: 28px 36px; }
+  .header h1 { font-size: 22px; font-weight: normal; margin-bottom: 6px; }
+  .header p { font-size: 13px; opacity: 0.75; }
+  .vendor-info { background: #EEF3F9; padding: 14px 36px; border-bottom: 1px solid #D0DCE8; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .vendor-info span { font-size: 13px; color: #444; }
+  .vendor-info strong { color: #003366; }
+  .body { padding: 28px 36px; }
+  .instruction { font-size: 13px; color: #555; margin-bottom: 20px; line-height: 1.6; background: #FFFBEA; border-left: 3px solid #F0A500; padding: 10px 14px; border-radius: 0 4px 4px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: #003366; color: white; }
+  thead th { padding: 11px 14px; text-align: left; font-weight: 500; font-size: 12px; letter-spacing: 0.4px; }
+  tbody tr { border-bottom: 1px solid #eee; transition: background 0.15s; }
+  tbody tr:hover { background: #F9F7FF; }
+  tbody tr:nth-child(even) { background: #FAFAFA; }
+  td { padding: 10px 14px; vertical-align: middle; }
+  .po-num { font-family: 'Courier New', monospace; font-size: 12px; color: #003366; font-weight: bold; }
+  .qty { text-align: center; font-weight: 600; color: #C0392B; }
+  .old-date { color: #C0392B; font-size: 12px; background: #FDECEA; padding: 3px 7px; border-radius: 3px; }
+  input[type="date"] { border: 1px solid #ccc; border-radius: 4px; padding: 6px 10px; font-size: 12px; color: #333; background: #fff; width: 145px; outline: none; transition: border-color 0.2s; }
+  input[type="date"]:focus { border-color: #003366; box-shadow: 0 0 0 2px rgba(0,51,102,0.1); }
+  input[type="date"].filled { border-color: #27AE60; background: #F0FFF5; }
+  .footer { padding: 20px 36px 28px; border-top: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .counter { font-size: 13px; color: #666; }
+  .counter span { font-weight: bold; color: #003366; }
+  .submit-btn { background: #003366; color: white; border: none; padding: 12px 32px; font-size: 14px; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+  .submit-btn:hover { background: #00254D; }
+  .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+  .error-screen { display: none; text-align: center; padding: 60px 36px; }
+  .error-icon { width: 60px; height: 60px; background: #C0392B; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
+  .error-icon svg { width: 30px; height: 30px; stroke: white; fill: none; stroke-width: 3; stroke-linecap: round; }
+  .error-screen h2 { font-size: 20px; color: #C0392B; margin-bottom: 10px; }
+  .error-screen p { font-size: 14px; color: #666; line-height: 1.6; }
+  .success-screen { display: none; text-align: center; padding: 60px 36px; }
+  .success-icon { width: 60px; height: 60px; background: #27AE60; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
+  .success-icon svg { width: 30px; height: 30px; stroke: white; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .success-screen h2 { font-size: 22px; color: #003366; margin-bottom: 10px; font-weight: normal; }
+  .success-screen p { font-size: 14px; color: #666; line-height: 1.6; }
+  .submitted-summary { margin-top: 24px; text-align: left; background: #F4F9F4; border: 1px solid #C8E6C9; border-radius: 4px; padding: 16px 20px; max-width: 550px; margin-left: auto; margin-right: auto; }
+  .submitted-summary h4 { font-size: 13px; color: #2E7D32; margin-bottom: 10px; font-weight: 600; }
+  .s-row { display: flex; justify-content: space-between; font-size: 12px; color: #444; padding: 5px 0; border-bottom: 1px solid #E8F5E9; gap: 10px; }
+  .s-row:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>Pending Delivery Update</h1>
+    <p>Please provide updated delivery dates for your pending purchase orders below.</p>
+  </div>
+
+  <div class="vendor-info">
+    <span>Vendor: <strong id="vendor-name">Loading...</strong></span>
+    <span>|</span>
+    <span>Total Pending POs: <strong id="po-count">0</strong></span>
+    <span>|</span>
+    <span>Date: <strong id="today-date"></strong></span>
+  </div>
+
+  <div id="main-form">
+    <div class="body">
+      <div class="instruction">
+        Please enter a new promised delivery date for each pending PO below. You only need to fill dates for POs you are updating. Click <strong>Submit Updates</strong> when done.
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>PO Number</th>
+            <th>Material Description</th>
+            <th style="text-align:center">Pending Qty</th>
+            <th>Original Date</th>
+            <th>New Promised Date</th>
+          </tr>
+        </thead>
+        <tbody id="po-table-body"></tbody>
+      </table>
+    </div>
+    <div class="footer">
+      <div class="counter">Dates filled: <span id="filled-count">0</span> of <span id="total-count">0</span></div>
+      <button class="submit-btn" onclick="submitUpdates()">Submit Updates</button>
+    </div>
+  </div>
+
+  <div class="error-screen" id="error-screen">
+    <div class="error-icon">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>
+    <h2>Invalid or Expired Link</h2>
+    <p>This link does not contain valid data.<br>Please contact the procurement team for a new link.</p>
+  </div>
+
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>Updates Submitted Successfully</h2>
+    <p>Thank you. Your delivery date updates have been recorded.<br>Our procurement team will be notified automatically.</p>
+    <div class="submitted-summary" id="submitted-summary">
+      <h4>Summary of Updates Submitted:</h4>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // READ DATA FROM URL PARAMETERS
+  // Power Automate builds a unique link per vendor like:
+  // portal.html?vendor=BANCO+FIRE&data=PO1|Material1|Qty1|Date1~~PO2|Material2|Qty2|Date2
+
+  const params = new URLSearchParams(window.location.search);
+  const vendorName = params.get('vendor') ? decodeURIComponent(params.get('vendor')) : null;
+  const rawData = params.get('data') ? decodeURIComponent(params.get('data')) : null;
+
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  if (!vendorName || !rawData) {
+    document.getElementById('main-form').style.display = 'none';
+    document.getElementById('error-screen').style.display = 'block';
+    document.getElementById('vendor-name').textContent = 'Unknown';
+  } else {
+
+    // Parse rows — format: PO|Material|Qty|Date~~PO|Material|Qty|Date
+    const pendingPOs = rawData.split('~~').map(row => {
+      const parts = row.split('|');
+      return { po: parts[0]||'', material: parts[1]||'', qty: parts[2]||'', originalDate: parts[3]||'' };
+    }).filter(item => item.po !== '');
+
+    document.getElementById('vendor-name').textContent = vendorName;
+    document.getElementById('po-count').textContent = pendingPOs.length;
+    document.getElementById('total-count').textContent = pendingPOs.length;
+
+    const tbody = document.getElementById('po-table-body');
+    const today = new Date().toISOString().split('T')[0];
+
+    pendingPOs.forEach((item, index) => {
+      let formattedOldDate = item.originalDate;
+      try { formattedOldDate = new Date(item.originalDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); } catch(e){}
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="color:#999;font-size:12px">${index+1}</td>
+        <td class="po-num">${item.po}</td>
+        <td>${item.material}</td>
+        <td class="qty">${item.qty}</td>
+        <td><span class="old-date">${formattedOldDate}</span></td>
+        <td><input type="date" id="date-${index}" onchange="updateCounter(this)" min="${today}"></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    window.updateCounter = function(input) {
+      input.classList.toggle('filled', !!input.value);
+      document.getElementById('filled-count').textContent = document.querySelectorAll('input[type="date"].filled').length;
+    };
+
+    window.submitUpdates = function() {
+      const updates = [];
+      pendingPOs.forEach((item, index) => {
+        const d = document.getElementById(`date-${index}`);
+        if (d && d.value) updates.push({ po: item.po, material: item.material, qty: item.qty, newDate: d.value });
+      });
+
+      if (updates.length === 0) { alert('Please enter at least one new delivery date before submitting.'); return; }
+
+      const btn = document.querySelector('.submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      const summary = document.getElementById('submitted-summary');
+      updates.forEach(u => {
+        const formatted = new Date(u.newDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        const row = document.createElement('div');
+        row.className = 's-row';
+        row.innerHTML = `<span><strong>${u.po}</strong> — ${u.material.length > 40 ? u.material.substring(0,40)+'...' : u.material}</span><span style="color:#27AE60;font-weight:bold;white-space:nowrap">${formatted}</span>`;
+        summary.appendChild(row);
+      });
+
+      fetch('https://default76ce8b888d444d7c92123238ef2975.4d.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/685b74af06ad49a9ad54cc46b553f35d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=IfySuLYJVSAI85Oe5DeCA3Wj6izvTv3Xf34wbYzOHSw', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ vendor: vendorName, updates: updates })
+})
+.then(res => {
+  if (!res.ok) throw new Error('Failed');
+  document.getElementById('main-form').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+})
+.catch(() => {
+  btn.disabled = false;
+  btn.textContent = 'Submit Updates';
+  alert('Submission failed. Please try again or contact the procurement team.');
+});
+    };
+  }
+</script>
+</body>
+</html>
