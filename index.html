@@ -113,6 +113,10 @@
 </div>
 
 <script>
+  // READ DATA FROM URL PARAMETERS
+  // Power Automate builds a unique link per vendor like:
+  // portal.html?vendor=BANCO+FIRE&data=PO1|Material1|Qty1|Date1~~PO2|Material2|Qty2|Date2
+
   const params = new URLSearchParams(window.location.search);
   const vendorName = params.get('vendor') ? decodeURIComponent(params.get('vendor')) : null;
   const rawData = params.get('data') ? decodeURIComponent(params.get('data')) : null;
@@ -125,6 +129,7 @@
     document.getElementById('vendor-name').textContent = 'Unknown';
   } else {
 
+    // Parse rows — format: PO|Material|Qty|Date~~PO|Material|Qty|Date
     const pendingPOs = rawData.split('~~').map(row => {
       const parts = row.split('|');
       return { po: parts[0]||'', material: parts[1]||'', qty: parts[2]||'', originalDate: parts[3]||'' };
@@ -184,8 +189,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vendor: vendorName, updates: updates })
       })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed');
+      .then(() => {
         document.getElementById('main-form').style.display = 'none';
         document.getElementById('success-screen').style.display = 'block';
       })
